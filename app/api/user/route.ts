@@ -17,8 +17,6 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  console.log("POST CREATE USER");
-
   const userSchema = z.object({
     username: z.string().min(1, "Username is required").max(100),
     email: z.string().min(1, "Email is required").email("Invalid email"),
