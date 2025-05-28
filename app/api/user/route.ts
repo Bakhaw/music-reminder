@@ -17,6 +17,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  console.log("POST CREATE USER");
+
   const userSchema = z.object({
     username: z.string().min(1, "Username is required").max(100),
     email: z.string().min(1, "Email is required").email("Invalid email"),
@@ -37,12 +39,16 @@ export async function POST(req: Request) {
     });
 
     if (existingUserByEmail) {
-      return NextResponse.json({
-        user: null,
-        message: "This email already exists",
-        status: 409,
-        field: "email",
-      });
+      return NextResponse.json(
+        {
+          user: null,
+          message: "This email already exists",
+          field: "email",
+        },
+        {
+          status: 409,
+        }
+      );
     }
 
     const existingUserByUsername = await db.user.findUnique({
@@ -52,12 +58,16 @@ export async function POST(req: Request) {
     });
 
     if (existingUserByUsername) {
-      return NextResponse.json({
-        user: null,
-        message: "This username already exists",
-        status: 409,
-        field: "username",
-      });
+      return NextResponse.json(
+        {
+          user: null,
+          message: "This username already exists",
+          field: "username",
+        },
+        {
+          status: 409,
+        }
+      );
     }
 
     const hashedPassword = await hash(password, 10);
@@ -71,17 +81,25 @@ export async function POST(req: Request) {
 
     const { password: pwd, ...safeUser } = newUser;
 
-    return NextResponse.json({
-      user: safeUser,
-      message: "User created successfully",
-      status: 201,
-    });
+    return NextResponse.json(
+      {
+        user: safeUser,
+        message: "User created successfully",
+      },
+      {
+        status: 201,
+      }
+    );
   } catch (error) {
-    console.log(error);
-    return NextResponse.json({
-      user: null,
-      message: "Something went wrong",
-      status: 500,
-    });
+    return NextResponse.json(
+      {
+        error,
+        user: null,
+        message: "Something went wrong",
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }
