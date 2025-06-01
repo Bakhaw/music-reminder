@@ -52,6 +52,7 @@ function Signin() {
     <div className="h-screen flex items-center justify-center">
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-6 p-12 border border-red-300 text-black">
+          <h1 className="text-white text-center">SIGN IN</h1>
           <input type="email" placeholder="email" {...register("email")} />
           {errors.email && (
             <p className="text-red-500">{errors.email.message}</p>
@@ -72,6 +73,7 @@ function Signin() {
           </button>
         </div>
       </form>
+      <p>Sign up</p>
     </div>
   );
 }

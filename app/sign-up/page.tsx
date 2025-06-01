@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -72,9 +73,10 @@ function Signup() {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center">
+    <div className="h-screen flex flex-col gap-4 items-center justify-center">
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-6 p-12 border border-red-300 text-black">
+          <h1 className="text-white text-center">SIGN UP</h1>
           <input type="text" placeholder="username" {...register("username")} />
           {errors.username && (
             <p className="text-red-500">{errors.username.message}</p>
@@ -108,6 +110,12 @@ function Signup() {
           </button>
         </div>
       </form>
+      <p>
+        Already have an account?{" "}
+        <Link href="/sign-in" className="text-red-300">
+          Sign in
+        </Link>
+      </p>
     </div>
   );
 }
