@@ -16,10 +16,7 @@ export async function GET(req: NextRequest) {
   const query = searchParams.get("q");
 
   if (!query) {
-    return NextResponse.json(
-      { error: "query parameter missing" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "q parameter missing" }, { status: 400 });
   }
 
   try {

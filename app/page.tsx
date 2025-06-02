@@ -2,11 +2,20 @@
 
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 
+import { getMe } from "@/app/api/me/methods";
 import SearchBox from "@/app/components/SearchBox";
 
 export default function Home() {
   const { data: session, status } = useSession();
+
+  const { data: me } = useQuery({
+    queryKey: ["me"],
+    queryFn: () => getMe(),
+  });
+
+  console.log("me", me);
 
   if (status === "loading")
     return (
