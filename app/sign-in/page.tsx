@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -49,31 +50,47 @@ function Signin() {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center">
+    <div className="h-screen flex flex-col gap-4 items-center justify-center">
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-6 p-12 border border-red-300 text-black">
           <h1 className="text-white text-center">SIGN IN</h1>
-          <input type="email" placeholder="email" {...register("email")} />
-          {errors.email && (
-            <p className="text-red-500">{errors.email.message}</p>
-          )}
 
-          <input
-            {...register("password")}
-            autoFocus={Boolean(emailFromURL)}
-            type="password"
-            placeholder="password"
-          />
-          {errors.password && (
-            <p className="text-red-500">{errors.password.message}</p>
-          )}
+          <div>
+            <input
+              className="w-full"
+              type="email"
+              placeholder="email"
+              {...register("email")}
+            />
+            {errors.email && (
+              <p className="text-red-500">{errors.email.message}</p>
+            )}
+          </div>
+
+          <div>
+            <input
+              className="w-full"
+              autoFocus={Boolean(emailFromURL)}
+              type="password"
+              placeholder="password"
+              {...register("password")}
+            />
+            {errors.password && (
+              <p className="text-red-500">{errors.password.message}</p>
+            )}
+          </div>
 
           <button className="border border-red-300 text-white" type="submit">
             Submit
           </button>
         </div>
       </form>
-      <p>Sign up</p>
+      <p>
+        Don&apos;t have an account ?{" "}
+        <Link href="/sign-up" className="text-red-300">
+          Sign up
+        </Link>
+      </p>
     </div>
   );
 }

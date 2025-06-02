@@ -77,33 +77,54 @@ function Signup() {
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-6 p-12 border border-red-300 text-black">
           <h1 className="text-white text-center">SIGN UP</h1>
-          <input type="text" placeholder="username" {...register("username")} />
-          {errors.username && (
-            <p className="text-red-500">{errors.username.message}</p>
-          )}
 
-          <input {...register("email")} type="email" placeholder="email" />
-          {errors.email && (
-            <p className="text-red-500">{errors.email.message}</p>
-          )}
+          <div>
+            <input
+              className="w-full"
+              type="text"
+              placeholder="username"
+              {...register("username")}
+            />
+            {errors.username && (
+              <p className="text-red-500">{errors.username.message}</p>
+            )}
+          </div>
 
-          <input
-            type="password"
-            placeholder="password"
-            {...register("password")}
-          />
-          {errors.password && (
-            <p className="text-red-500">{errors.password.message}</p>
-          )}
+          <div>
+            <input
+              className="w-full"
+              type="email"
+              placeholder="email"
+              {...register("email")}
+            />
+            {errors.email && (
+              <p className="text-red-500">{errors.email.message}</p>
+            )}
+          </div>
 
-          <input
-            type="password"
-            placeholder="confirmPassword"
-            {...register("confirmPassword")}
-          />
-          {errors.confirmPassword && (
-            <p className="text-red-500">{errors.confirmPassword.message}</p>
-          )}
+          <div>
+            <input
+              className="w-full"
+              type="password"
+              placeholder="password"
+              {...register("password")}
+            />
+            {errors.password && (
+              <p className="text-red-500">{errors.password.message}</p>
+            )}
+          </div>
+
+          <div>
+            <input
+              className="w-full"
+              type="password"
+              placeholder="confirmPassword"
+              {...register("confirmPassword")}
+            />
+            {errors.confirmPassword && (
+              <p className="text-red-500">{errors.confirmPassword.message}</p>
+            )}
+          </div>
 
           <button className="border border-red-300 text-white" type="submit">
             Submit
