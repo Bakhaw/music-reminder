@@ -10,11 +10,16 @@ import { searchFromYtbmusicApi } from "@/app/api/search/methods";
 import { saveAlbums } from "@/app/api/user/[userId]/methods";
 import useDebounce from "@/app/hooks/useDebounce";
 
+export type AlbumToSave = {
+  id: string;
+  name: string;
+  artist: string;
+  cover: string;
+};
+
 function SearchBox() {
   const { data: session } = useSession();
-  const [selectedAlbums, setSelectedAlbums] = useState<
-    Array<AlbumDetailed["albumId"]>
-  >([]);
+  const [selectedAlbums, setSelectedAlbums] = useState<Array<AlbumToSave>>([]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedQuery = useDebounce([searchQuery], 500);
@@ -25,15 +30,15 @@ function SearchBox() {
     enabled: Boolean(debouncedQuery[0]),
   });
 
-  function toggleSelectAlbum(albumId: string) {
+  function toggleSelectAlbum(album: AlbumToSave) {
     setSelectedAlbums((prevSelected) => {
-      const newSet = new Set(prevSelected);
-      if (newSet.has(albumId)) {
-        newSet.delete(albumId);
+      const exists = prevSelected.some((a) => a.id === album.id);
+
+      if (exists) {
+        return prevSelected.filter((a) => a.id !== album.id);
       } else {
-        newSet.add(albumId);
+        return [...prevSelected, album];
       }
-      return Array.from(newSet);
     });
   }
 
@@ -62,12 +67,19 @@ function SearchBox() {
         />
       </div>
 
-      <ul className="grid grid-cols-2 gap-4">
+      <ul className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {albums?.map((album) => (
           <div
             key={album.albumId}
             className="border"
-            onClick={() => toggleSelectAlbum(album.albumId)}
+            onClick={() =>
+              toggleSelectAlbum({
+                id: album.albumId,
+                name: album.name,
+                artist: album.artist.name,
+                cover: album.thumbnails[3].url,
+              })
+            }
           >
             <p className="line-clamp-1">{album.name}</p>
 

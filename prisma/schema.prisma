@@ -22,5 +22,5 @@ model User {
   updatedAt DateTime @updatedAt
   username  String   @unique
   password  String
-  albums    String[]
+  albums    Json[]
 }

@@ -1,19 +1,27 @@
 import { NextResponse } from "next/server";
-import * as z from "zod";
+import { z } from "zod";
 
 import { db } from "@/app/lib/db";
+
+const albumToSaveSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  artist: z.string(),
+  cover: z.string(),
+});
+
+const updateAlbumsSchema = z.object({
+  albums: z.array(albumToSaveSchema).optional(),
+});
 
 export async function PATCH(
   req: Request,
   { params }: { params: { userId: string } }
 ) {
-  const updateAlbumsSchema = z.object({
-    albums: z.array(z.string(), z.string()).optional(),
-  });
-
   try {
     const body = await req.json();
-    const { userId } = params;
+    const { userId } = await params;
+
     const { albums } = updateAlbumsSchema.parse(body);
 
     const user = await db.user.findUnique({ where: { id: userId } });
@@ -39,10 +47,12 @@ export async function PATCH(
       { status: 200 }
     );
   } catch (error) {
+    console.error("PATCH /users/:userId/albums error:", error);
+
     return NextResponse.json(
       {
         message: "Failed to update albums",
-        error,
+        error: error instanceof Error ? error.message : error,
       },
       { status: 500 }
     );
