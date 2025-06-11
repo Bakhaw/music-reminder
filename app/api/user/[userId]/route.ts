@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { db } from "@/app/lib/db";
+import { AlbumToSave } from "@/app/components/SearchBox";
 
 const albumToSaveSchema = z.object({
   id: z.string(),
@@ -24,16 +25,22 @@ export async function PATCH(
 
     const { albums } = updateAlbumsSchema.parse(body);
 
-    const user = await db.user.findUnique({ where: { id: userId } });
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { albums: true },
+    });
 
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
+    const existingAlbums = (user.albums ?? []) as Array<AlbumToSave>;
+    const newAlbums = albums ?? [];
+
     const updatedUser = await db.user.update({
       where: { id: userId },
       data: {
-        albums: albums ?? [],
+        albums: [...existingAlbums, ...newAlbums],
       },
     });
 

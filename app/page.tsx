@@ -1,18 +1,20 @@
 "use client";
 
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
 import { getMe } from "@/app/api/me/methods";
+
 import SearchBox from "@/app/components/SearchBox";
+import AppBar from "@/app/components/AppBar";
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   const { data: me } = useQuery({
     queryKey: ["me"],
-    queryFn: () => getMe(),
+    queryFn: getMe,
   });
 
   console.log("me", me);
@@ -41,17 +43,7 @@ export default function Home() {
         </div>
       ) : (
         <div className="p-6 min-h-screen flex flex-col gap-4">
-          <div className="flex justify-between">
-            <p>Connected as {session?.user.email}</p>
-
-            <button
-              onClick={() => signOut()}
-              className="w-56 border border-red-300 px-6 py-2 text-white"
-            >
-              Sign Out
-            </button>
-          </div>
-
+          <AppBar />
           <SearchBox />
         </div>
       )}

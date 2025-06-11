@@ -9,6 +9,9 @@ import { AlbumDetailed } from "ytmusic-api";
 import { searchFromYtbmusicApi } from "@/app/api/search/methods";
 import { saveAlbums } from "@/app/api/user/[userId]/methods";
 import useDebounce from "@/app/hooks/useDebounce";
+import { cn } from "@/app/lib/utils";
+
+import { Button } from "@/app/components/ui/button";
 
 export type AlbumToSave = {
   id: string;
@@ -67,39 +70,51 @@ function SearchBox() {
         />
       </div>
 
-      <ul className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        {albums?.map((album) => (
-          <div
-            key={album.albumId}
-            className="border"
-            onClick={() =>
-              toggleSelectAlbum({
-                id: album.albumId,
-                name: album.name,
-                artist: album.artist.name,
-                cover: album.thumbnails[3].url,
-              })
-            }
-          >
-            <p className="line-clamp-1">{album.name}</p>
+      <ul className="flex flex-col gap-4">
+        {albums?.map((album) => {
+          const isSelected = selectedAlbums.find(
+            (alb) => alb.id === album.albumId
+          );
 
-            <Image
-              alt={album.name}
-              src={album.thumbnails[3].url}
-              height={album.thumbnails[3].height}
-              width={album.thumbnails[3].width}
-            />
-          </div>
-        ))}
+          return (
+            <button
+              className={cn(
+                "flex gap-2",
+                isSelected && "bg-foreground text-background"
+              )}
+              key={album.albumId}
+              onClick={() =>
+                toggleSelectAlbum({
+                  id: album.albumId,
+                  name: album.name,
+                  artist: album.artist.name,
+                  cover: album.thumbnails[3].url,
+                })
+              }
+            >
+              <Image
+                alt={album.name}
+                src={album.thumbnails[3].url}
+                height={60}
+                width={60}
+              />
+
+              <div className="flex flex-col items-start">
+                <span className="line-clamp-1">{album.name}</span>
+                <span className="line-clamp-1">{album.artist.name}</span>
+              </div>
+            </button>
+          );
+        })}
       </ul>
 
-      <button
-        className="bg-red-300 text-black p-4"
+      <Button
+        className="bg-foreground text-background hover:bg-foreground"
         disabled={selectedAlbums.length === 0}
         onClick={saveSelection}
       >
         Add selection
-      </button>
+      </Button>
     </div>
   );
 }
