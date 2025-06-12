@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
+
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -15,21 +17,29 @@ function AppBar() {
   if (!session?.user?.email) return null;
 
   return (
-    <div className="flex justify-end p-4">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline">{session.user.email}</Button>
-        </DropdownMenuTrigger>
+    <div className="flex justify-between">
+      <Link href="/add-album">
+        <Button variant="ghost" className="border">
+          Add album +
+        </Button>
+      </Link>
 
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={() => signOut()}
-            className="text-red-500 focus:text-red-600"
-          >
-            Sign Out
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="flex justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">{session.user.email}</Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => signOut()}
+              className="text-red-500 focus:text-red-600"
+            >
+              Sign Out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   );
 }

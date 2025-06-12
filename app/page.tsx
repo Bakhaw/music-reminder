@@ -6,10 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getMe } from "@/app/api/me/methods";
 
-import SearchBox from "@/app/components/SearchBox";
-import AppBar from "@/app/components/AppBar";
+import Image from "next/image";
 
-export default function Home() {
+function Home() {
   const { status } = useSession();
 
   const { data: me } = useQuery({
@@ -42,11 +41,30 @@ export default function Home() {
           </Link>
         </div>
       ) : (
-        <div className="p-6 min-h-screen flex flex-col gap-4">
-          <AppBar />
-          <SearchBox />
+        <div className="flex flex-col gap-6">
+          <h1 className="text-xl">Welcome, {me?.username} !</h1>
+
+          <ul className="flex flex-col gap-4">
+            {me?.albums.map((album) => (
+              <li key={album.id} className="flex gap-4">
+                <Image
+                  alt={album.name}
+                  src={album.cover}
+                  height={90}
+                  width={90}
+                />
+
+                <div className="flex flex-col">
+                  <span>{album.name}</span>
+                  <span>{album.artist}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
   );
 }
+
+export default Home;
