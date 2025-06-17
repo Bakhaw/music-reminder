@@ -4,6 +4,8 @@ import { z } from "zod";
 import { db } from "@/app/lib/db";
 import { AlbumToSave } from "@/app/components/SearchBox";
 
+export const runtime = "nodejs";
+
 const albumToSaveSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -75,18 +77,15 @@ const deleteAlbumSchema = z.object({
   albumId: z.string(),
 });
 
-export async function DELETE(req: Request) {
+export async function DELETE(
+  req: Request,
+  { params }: { params: { userId: string } }
+) {
   try {
     const body = await req.json();
+    const { userId } = params;
 
     const { albumId } = deleteAlbumSchema.parse(body);
-
-    const url = new URL(req.url);
-    const userId = url.pathname.split("/").pop(); // Gets [userId] from the URL
-
-    if (!userId) {
-      return NextResponse.json({ message: "Missing userId" }, { status: 400 });
-    }
 
     const user = await db.user.findUnique({
       where: { id: userId },
