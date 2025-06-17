@@ -21,6 +21,13 @@ export async function GET() {
       where: {
         email: session.user.email,
       },
+      select: {
+        albums: true,
+        email: true,
+        id: true,
+        image: true,
+        username: true,
+      },
     });
 
     if (!user)
@@ -29,9 +36,7 @@ export async function GET() {
         { status: 404, statusText: "User Not Found" }
       );
 
-    const { password, ...safeUser } = user;
-
-    return NextResponse.json(safeUser, {
+    return NextResponse.json(user, {
       status: 200,
     });
   } catch (error) {

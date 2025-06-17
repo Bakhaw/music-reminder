@@ -4,11 +4,9 @@ import { AlbumToSave } from "@/app/components/SearchBox";
 
 type Me = {
   albums: AlbumToSave[];
-  createdAt: string;
   email: string;
   id: string;
   image: string;
-  updatedAt: string;
   username: string;
 };
 

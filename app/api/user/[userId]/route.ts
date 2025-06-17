@@ -42,14 +42,19 @@ export async function PATCH(
       data: {
         albums: [...existingAlbums, ...newAlbums],
       },
+      select: {
+        albums: true,
+        email: true,
+        id: true,
+        image: true,
+        username: true,
+      },
     });
-
-    const { password, ...safeUser } = updatedUser;
 
     return NextResponse.json(
       {
         message: "Albums updated successfully",
-        user: safeUser,
+        user: updatedUser,
       },
       { status: 200 }
     );
@@ -100,14 +105,19 @@ export async function DELETE(
       data: {
         albums: updatedAlbums,
       },
+      select: {
+        albums: true,
+        email: true,
+        id: true,
+        image: true,
+        username: true,
+      },
     });
-
-    const { password, ...safeUser } = updatedUser;
 
     return NextResponse.json(
       {
         message: "Albums deleted successfully",
-        user: safeUser,
+        user: updatedUser,
       },
       { status: 200 }
     );

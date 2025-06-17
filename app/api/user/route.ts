@@ -75,13 +75,18 @@ export async function POST(req: Request) {
         password: hashedPassword,
         username,
       },
+      select: {
+        albums: true,
+        email: true,
+        id: true,
+        image: true,
+        username: true,
+      },
     });
-
-    const { password: pwd, ...safeUser } = newUser;
 
     return NextResponse.json(
       {
-        user: safeUser,
+        user: newUser,
         message: "User created successfully",
       },
       {
