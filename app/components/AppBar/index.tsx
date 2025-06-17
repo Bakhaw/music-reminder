@@ -1,28 +1,35 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 
+import { Button } from "@/app/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/app/components/ui/dropdown-menu";
-import { Button } from "@/app/components/ui/button";
 
 function AppBar() {
   const { data: session } = useSession();
+  const { back } = useRouter();
+  const pathname = usePathname();
 
   if (!session?.user?.email) return null;
 
   return (
     <div className="flex justify-between">
-      <Link href="/add-album">
-        <Button variant="ghost" className="border">
-          Add album +
+      {pathname === "/" ? (
+        <Link href="/add-album">
+          <Button variant="outline">Add album +</Button>
+        </Link>
+      ) : (
+        <Button variant="ghost" onClick={back}>
+          Back
         </Button>
-      </Link>
+      )}
 
       <div className="flex justify-end">
         <DropdownMenu>

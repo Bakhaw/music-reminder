@@ -33,7 +33,7 @@ export default function RootLayout({
       >
         <main className="max-w-lg m-auto">
           <Providers>
-            <div className="p-6 min-h-screen flex flex-col gap-4 border">
+            <div className="p-6 min-h-screen flex flex-col gap-4">
               <AppBar />
 
               {children}
