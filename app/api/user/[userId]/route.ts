@@ -65,3 +65,61 @@ export async function PATCH(
     );
   }
 }
+
+const deleteAlbumSchema = z.object({
+  albumId: z.string(),
+});
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { userId: string } }
+) {
+  try {
+    const body = await req.json();
+    const { userId } = params;
+
+    const { albumId } = deleteAlbumSchema.parse(body);
+
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { albums: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    const existingAlbums = (user.albums ?? []) as Array<AlbumToSave>;
+
+    const updatedAlbums = existingAlbums.filter(
+      (album) => album.id !== albumId
+    );
+
+    const updatedUser = await db.user.update({
+      where: { id: userId },
+      data: {
+        albums: updatedAlbums,
+      },
+    });
+
+    const { password, ...safeUser } = updatedUser;
+
+    return NextResponse.json(
+      {
+        message: "Albums deleted successfully",
+        user: safeUser,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("DELETE /users/:userId/albums error:", error);
+
+    return NextResponse.json(
+      {
+        message: "Failed to delete albums",
+        error: error instanceof Error ? error.message : error,
+      },
+      { status: 500 }
+    );
+  }
+}

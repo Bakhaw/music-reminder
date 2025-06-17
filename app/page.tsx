@@ -2,11 +2,12 @@
 
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 
 import { getMe } from "@/app/api/me/methods";
-
-import Image from "next/image";
+import { deleteAlbum } from "@/app/api/user/[userId]/methods";
+import { Button } from "@/app/components/ui/button";
 
 function Home() {
   const { status } = useSession();
@@ -16,7 +17,13 @@ function Home() {
     queryFn: getMe,
   });
 
-  console.log("me", me);
+  async function removeFromSavedAlbums(albumId: string) {
+    if (!me) return;
+
+    const data = await deleteAlbum(me.id, albumId);
+    console.log("album deleted:", albumId);
+    console.log("new albums:", data);
+  }
 
   if (status === "loading")
     return (
@@ -46,18 +53,27 @@ function Home() {
 
           <ul className="flex flex-col gap-4">
             {me?.albums.map((album) => (
-              <li key={album.id} className="flex gap-4">
-                <Image
-                  alt={album.name}
-                  src={album.cover}
-                  height={90}
-                  width={90}
-                />
+              <li key={album.id} className="flex justify-between">
+                <div className="flex gap-4">
+                  <Image
+                    alt={album.name}
+                    src={album.cover}
+                    height={90}
+                    width={90}
+                  />
 
-                <div className="flex flex-col">
-                  <span>{album.name}</span>
-                  <span>{album.artist}</span>
+                  <div className="flex flex-col">
+                    <span>{album.name}</span>
+                    <span>{album.artist}</span>
+                  </div>
                 </div>
+
+                <Button
+                  variant="outline"
+                  onClick={() => removeFromSavedAlbums(album.id)}
+                >
+                  Delete
+                </Button>
               </li>
             ))}
           </ul>

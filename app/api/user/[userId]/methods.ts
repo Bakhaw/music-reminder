@@ -18,3 +18,22 @@ export async function saveAlbums(userId: string, albums: AlbumToSave[]) {
 
   return res.json();
 }
+
+export async function deleteAlbum(userId: string, albumId: string) {
+  const url = `/api/user/${userId}`;
+
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ albumId }),
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || "Failed to delete album");
+  }
+
+  return res.json();
+}
