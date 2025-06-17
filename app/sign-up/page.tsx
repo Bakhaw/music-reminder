@@ -65,7 +65,7 @@ function Signup() {
 
       // todo show an alert to tell the user his account is successfully created
       if (response.status === 201) {
-        router.push(`/sign-in?email=${values.email}`);
+        router.push(`/sign-in`);
       }
     } catch (error) {
       console.error(error);

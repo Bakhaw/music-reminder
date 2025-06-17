@@ -1,10 +1,10 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
 const FormSchema = z.object({
@@ -17,13 +17,11 @@ const FormSchema = z.object({
 
 function Signin() {
   const router = useRouter();
-  const params = useSearchParams();
-  const emailFromURL = params.get("email");
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      email: emailFromURL ?? "",
+      email: "",
       password: "",
     },
   });
@@ -70,7 +68,6 @@ function Signin() {
           <div>
             <input
               className="w-full"
-              autoFocus={Boolean(emailFromURL)}
               type="password"
               placeholder="password"
               {...register("password")}
