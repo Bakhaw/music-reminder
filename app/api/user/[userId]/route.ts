@@ -1,10 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { db } from "@/app/lib/db";
 import { AlbumToSave } from "@/app/components/SearchBox";
-
-export const runtime = "nodejs";
 
 const albumToSaveSchema = z.object({
   id: z.string(),
@@ -17,14 +15,23 @@ const updateAlbumsSchema = z.object({
   albums: z.array(albumToSaveSchema).optional(),
 });
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { userId: string } }
-) {
-  try {
-    const body = await req.json();
-    const { userId } = await params;
+const deleteAlbumSchema = z.object({
+  albumId: z.string(),
+});
 
+// Helper to extract userId from URL path /api/user/[userId]
+function extractUserId(url: string) {
+  const pathname = new URL(url).pathname;
+  const parts = pathname.split("/");
+  // Assumes the last segment is userId: e.g. /api/user/abc123
+  return parts[parts.length - 1];
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const userId = extractUserId(req.url);
+
+    const body = await req.json();
     const { albums } = updateAlbumsSchema.parse(body);
 
     const user = await db.user.findUnique({
@@ -73,18 +80,11 @@ export async function PATCH(
   }
 }
 
-const deleteAlbumSchema = z.object({
-  albumId: z.string(),
-});
-
-export async function DELETE(
-  req: Request,
-  { params }: { params: { userId: string } }
-) {
+export async function DELETE(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { userId } = params;
+    const userId = extractUserId(req.url);
 
+    const body = await req.json();
     const { albumId } = deleteAlbumSchema.parse(body);
 
     const user = await db.user.findUnique({
