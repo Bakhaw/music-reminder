@@ -3,9 +3,13 @@
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+
+import { Button } from "@/app/components/ui/button";
+import { Input } from "@/app/components/ui/input";
 
 const FormSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email"),
@@ -31,21 +35,33 @@ function Signin() {
     formState: { errors },
   } = form;
 
-  const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-    const signInData = await signIn("credentials", {
-      email: values.email,
-      password: values.password,
-      redirect: false,
-    });
+  const { mutate: signInMutation, isPending } = useMutation({
+    mutationFn: async (values: z.infer<typeof FormSchema>) => {
+      const signInData = await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        redirect: false,
+      });
 
-    if (signInData?.error) {
-      form.setError("email", { message: "Email or password is wrong" });
-      form.setError("password", { message: "Email or password is wrong" });
-    } else {
+      if (!signInData || signInData.error) {
+        throw new Error("Email or password is wrong");
+      }
+
+      return signInData;
+    },
+    onSuccess: () => {
       router.refresh();
       router.push("/");
-    }
-  };
+    },
+    onError: () => {
+      form.setError("email", { message: "Email or password is wrong" });
+      form.setError("password", { message: "Email or password is wrong" });
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof FormSchema>) {
+    await signInMutation(values);
+  }
 
   return (
     <div className="h-screen flex flex-col gap-4 items-center justify-center">
@@ -54,10 +70,10 @@ function Signin() {
           <h1 className="text-white text-center">SIGN IN</h1>
 
           <div>
-            <input
-              className="w-full"
+            <Input
               type="email"
               placeholder="email"
+              disabled={isPending}
               {...register("email")}
             />
             {errors.email && (
@@ -66,10 +82,10 @@ function Signin() {
           </div>
 
           <div>
-            <input
-              className="w-full"
+            <Input
               type="password"
               placeholder="password"
+              disabled={isPending}
               {...register("password")}
             />
             {errors.password && (
@@ -77,9 +93,9 @@ function Signin() {
             )}
           </div>
 
-          <button className="border border-red-300 text-white" type="submit">
+          <Button variant="secondary" type="submit" disabled={isPending}>
             Submit
-          </button>
+          </Button>
         </div>
       </form>
       <p>

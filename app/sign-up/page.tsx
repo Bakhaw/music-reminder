@@ -3,8 +3,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+
+import { Button } from "@/app/components/ui/button";
+import { Input } from "@/app/components/ui/input";
 
 const FormSchema = z
   .object({
@@ -43,8 +47,12 @@ function Signup() {
     formState: { errors },
   } = form;
 
-  const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-    try {
+  const { mutate: signUpMutation, isPending } = useMutation<
+    unknown,
+    { field: keyof z.infer<typeof FormSchema>; message: string },
+    z.infer<typeof FormSchema>
+  >({
+    mutationFn: async (values: z.infer<typeof FormSchema>) => {
       const response = await fetch("/api/user", {
         method: "POST",
         headers: {
@@ -60,17 +68,28 @@ function Signup() {
       const json = await response.json();
 
       if (response.status === 409) {
-        form.setError(json.field, { message: json.message });
+        throw { field: json.field, message: json.message };
       }
 
-      // todo show an alert to tell the user his account is successfully created
-      if (response.status === 201) {
-        router.push(`/sign-in`);
+      if (response.status !== 201) {
+        throw new Error("Unexpected server error");
       }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+
+      return json;
+    },
+    onSuccess: () => {
+      router.push("/sign-in");
+    },
+    onError: (error) => {
+      if (error.message) {
+        form.setError(error.field, { message: error.message });
+      }
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof FormSchema>) {
+    await signUpMutation(values);
+  }
 
   return (
     <div className="h-screen flex flex-col gap-4 items-center justify-center">
@@ -79,10 +98,10 @@ function Signup() {
           <h1 className="text-white text-center">SIGN UP</h1>
 
           <div>
-            <input
-              className="w-full"
+            <Input
               type="text"
               placeholder="username"
+              disabled={isPending}
               {...register("username")}
             />
             {errors.username && (
@@ -91,10 +110,10 @@ function Signup() {
           </div>
 
           <div>
-            <input
-              className="w-full"
+            <Input
               type="email"
               placeholder="email"
+              disabled={isPending}
               {...register("email")}
             />
             {errors.email && (
@@ -103,11 +122,11 @@ function Signup() {
           </div>
 
           <div>
-            <input
-              className="w-full"
+            <Input
               type="password"
               placeholder="password"
               {...register("password")}
+              disabled={isPending}
             />
             {errors.password && (
               <p className="text-red-500">{errors.password.message}</p>
@@ -115,10 +134,10 @@ function Signup() {
           </div>
 
           <div>
-            <input
-              className="w-full"
+            <Input
               type="password"
               placeholder="confirmPassword"
+              disabled={isPending}
               {...register("confirmPassword")}
             />
             {errors.confirmPassword && (
@@ -126,9 +145,9 @@ function Signup() {
             )}
           </div>
 
-          <button className="border border-red-300 text-white" type="submit">
+          <Button variant="secondary" type="submit" disabled={isPending}>
             Submit
-          </button>
+          </Button>
         </div>
       </form>
       <p>
