@@ -3,27 +3,32 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { getMe } from "@/app/api/me/methods";
 import { deleteAlbum } from "@/app/api/user/[userId]/methods";
+import { ME_QUERY_KEY } from "@/app/lib/queries";
+
 import { Button } from "@/app/components/ui/button";
 
 function Home() {
   const { status } = useSession();
+  const queryClient = useQueryClient();
 
   const { data: me } = useQuery({
-    queryKey: ["me"],
+    queryKey: [ME_QUERY_KEY],
     queryFn: getMe,
   });
 
-  async function removeFromSavedAlbums(albumId: string) {
-    if (!me) return;
-
-    const data = await deleteAlbum(me.id, albumId);
-    console.log("album deleted:", albumId);
-    console.log("new albums:", data);
-  }
+  const { mutate: deleteAlbumMutation } = useMutation({
+    mutationFn: (albumId: string) => {
+      if (!me) throw new Error("User not loaded");
+      return deleteAlbum(me.id, albumId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [ME_QUERY_KEY] });
+    },
+  });
 
   if (status === "loading")
     return (
@@ -70,7 +75,7 @@ function Home() {
 
                 <Button
                   variant="outline"
-                  onClick={() => removeFromSavedAlbums(album.id)}
+                  onClick={() => deleteAlbumMutation(album.id)}
                 >
                   Delete
                 </Button>
