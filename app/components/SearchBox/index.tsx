@@ -50,6 +50,7 @@ function SearchBox() {
 
     try {
       const result = await saveAlbums(session.user.id, selectedAlbums);
+      setSelectedAlbums([]);
 
       console.log("saveAlbums result:", result);
     } catch (err) {
