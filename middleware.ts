@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-export const runtime = "nodejs";
-
 export default async function middleware(req: NextRequest) {
   const token = await getToken({
     req,
