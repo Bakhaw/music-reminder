@@ -9,10 +9,11 @@ const albumToSaveSchema = z.object({
   name: z.string(),
   artist: z.string(),
   cover: z.string(),
+  year: z.number().nullable(),
 });
 
 const updateAlbumsSchema = z.object({
-  albums: z.array(albumToSaveSchema).optional(),
+  album: albumToSaveSchema,
 });
 
 const deleteAlbumSchema = z.object({
@@ -32,7 +33,7 @@ export async function PATCH(req: NextRequest) {
     const userId = extractUserId(req.url);
 
     const body = await req.json();
-    const { albums } = updateAlbumsSchema.parse(body);
+    const { album } = updateAlbumsSchema.parse(body);
 
     const user = await db.user.findUnique({
       where: { id: userId },
@@ -44,12 +45,11 @@ export async function PATCH(req: NextRequest) {
     }
 
     const existingAlbums = (user.albums ?? []) as Array<AlbumToSave>;
-    const newAlbums = albums ?? [];
 
     const updatedUser = await db.user.update({
       where: { id: userId },
       data: {
-        albums: [...existingAlbums, ...newAlbums],
+        albums: [...existingAlbums, album],
       },
       select: {
         albums: true,

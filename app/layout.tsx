@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import Providers from "@/app/components/Providers";
-import AppBar from "@/app/components/AppBar";
 
 import "./globals.css";
 
@@ -32,11 +31,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <main className="max-w-lg m-auto">
+        <main className="max-w-2xl m-auto">
           <Providers>
             <div className="p-6 min-h-screen flex flex-col gap-4">
-              <AppBar />
-
               {children}
             </div>
           </Providers>

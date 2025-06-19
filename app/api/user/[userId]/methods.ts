@@ -1,6 +1,6 @@
 import { AlbumToSave } from "@/app/components/SearchBox";
 
-export async function saveAlbums(userId: string, albums: AlbumToSave[]) {
+export async function saveAlbum(userId: string, album: AlbumToSave) {
   const url = `/api/user/${userId}`;
 
   const res = await fetch(url, {
@@ -8,7 +8,7 @@ export async function saveAlbums(userId: string, albums: AlbumToSave[]) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ albums }),
+    body: JSON.stringify({ album }),
   });
 
   if (!res.ok) {

@@ -1,39 +1,37 @@
 "use client";
 
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Heart, Loader2, Search } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import Image from "next/image";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { getMe } from "@/app/api/me/methods";
-import { deleteAlbum } from "@/app/api/user/[userId]/methods";
 import { ME_QUERY_KEY } from "@/app/lib/queries";
 
-import { Button } from "@/app/components/ui/button";
+import Collection from "@/app/components/Collection";
+import SearchBox from "@/app/components/SearchBox";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/app/components/ui/tabs";
+import AppBar from "./components/AppBar";
 
 function Home() {
   const { status } = useSession();
-  const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState("search");
 
-  const { data: me } = useQuery({
+  const { data: me, isLoading: isLoadingMe } = useQuery({
     queryKey: [ME_QUERY_KEY],
     queryFn: getMe,
   });
 
-  const { mutate: deleteAlbumMutation } = useMutation({
-    mutationFn: (albumId: string) => {
-      if (!me) throw new Error("User not loaded");
-      return deleteAlbum(me.id, albumId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [ME_QUERY_KEY] });
-    },
-  });
-
-  if (status === "loading")
+  if (status === "loading" || isLoadingMe)
     return (
       <div className="min-h-screen flex justify-center items-center">
-        <p>Loading ...</p>
+        <Loader2 className="h-7 w-7 animate-spin" />
       </div>
     );
 
@@ -53,36 +51,50 @@ function Home() {
           </Link>
         </div>
       ) : (
-        <div className="flex flex-col gap-6">
-          <h1 className="text-xl">Welcome, {me?.username} !</h1>
+        <>
+          <AppBar />
 
-          <ul className="flex flex-col gap-4">
-            {me?.albums.map((album) => (
-              <li key={album.id} className="flex justify-between">
-                <div className="flex gap-4">
-                  <Image
-                    alt={album.name}
-                    src={album.cover}
-                    height={90}
-                    width={90}
-                  />
+          <div className="text-center my-6">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <h1 className="text-4xl font-bold text-gray-900">
+                Music Reminder 💜
+              </h1>
+            </div>
+            <p className="text-gray-600 text-lg">
+              Save albums you want to listen to later
+            </p>
+          </div>
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="search" className="flex items-center gap-2">
+                <Search className="h-4 w-4" />
+                Search Albums
+              </TabsTrigger>
+              <TabsTrigger
+                value="collection"
+                className="flex items-center gap-2"
+              >
+                <Heart className="h-4 w-4" />
+                My Collection ({me?.albums.length})
+              </TabsTrigger>
+            </TabsList>
 
-                  <div className="flex flex-col">
-                    <span>{album.name}</span>
-                    <span>{album.artist}</span>
-                  </div>
-                </div>
+            <TabsContent value="search" className="space-y-6">
+              <SearchBox collection={me?.albums ?? []} />
+            </TabsContent>
 
-                <Button
-                  variant="outline"
-                  onClick={() => deleteAlbumMutation(album.id)}
-                >
-                  Delete
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </div>
+            <TabsContent value="collection" className="space-y-6">
+              <Collection
+                collection={me?.albums ?? []}
+                onEmptyButtonClick={() => setActiveTab("search")}
+              />
+            </TabsContent>
+          </Tabs>
+        </>
       )}
     </div>
   );
