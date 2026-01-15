@@ -16,7 +16,7 @@ function AppBar() {
   if (!session?.user?.email) return null;
 
   return (
-    <div className="flex justify-end">
+    <div className="flex justify-end py-6">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

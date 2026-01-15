@@ -8,6 +8,13 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { Button } from "@/app/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/app/components/ui/card";
 import { Input } from "@/app/components/ui/input";
 
 const FormSchema = z
@@ -93,66 +100,82 @@ function Signup() {
 
   return (
     <div className="h-screen flex flex-col gap-4 items-center justify-center">
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="flex flex-col gap-6 p-12 border border-red-300 text-black">
-          <h1 className="text-white text-center">SIGN UP</h1>
+      <Card>
+        <CardHeader>
+          <CardTitle>Music Reminder 💜</CardTitle>
+          <CardDescription>
+            Create an account to start building your music collection
+          </CardDescription>
+        </CardHeader>
 
-          <div>
-            <Input
-              type="text"
-              placeholder="username"
-              disabled={isPending}
-              {...register("username")}
-            />
-            {errors.username && (
-              <p className="text-red-500">{errors.username.message}</p>
-            )}
-          </div>
+        <CardContent>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="space-y-5">
+              <div>
+                <Input
+                  type="text"
+                  placeholder="username"
+                  disabled={isPending}
+                  {...register("username")}
+                />
+                {errors.username && (
+                  <p className="text-sm text-red-500">
+                    {errors.username.message}
+                  </p>
+                )}
+              </div>
 
-          <div>
-            <Input
-              type="email"
-              placeholder="email"
-              disabled={isPending}
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className="text-red-500">{errors.email.message}</p>
-            )}
-          </div>
+              <div>
+                <Input
+                  type="email"
+                  placeholder="email"
+                  disabled={isPending}
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <p className="text-sm text-red-500">{errors.email.message}</p>
+                )}
+              </div>
 
-          <div>
-            <Input
-              type="password"
-              placeholder="password"
-              {...register("password")}
-              disabled={isPending}
-            />
-            {errors.password && (
-              <p className="text-red-500">{errors.password.message}</p>
-            )}
-          </div>
+              <div>
+                <Input
+                  type="password"
+                  placeholder="********"
+                  disabled={isPending}
+                  {...register("password")}
+                />
+                {errors.password && (
+                  <p className="text-sm text-red-500">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
 
-          <div>
-            <Input
-              type="password"
-              placeholder="confirmPassword"
-              disabled={isPending}
-              {...register("confirmPassword")}
-            />
-            {errors.confirmPassword && (
-              <p className="text-red-500">{errors.confirmPassword.message}</p>
-            )}
-          </div>
+              <div>
+                <Input
+                  type="password"
+                  placeholder="********"
+                  disabled={isPending}
+                  {...register("confirmPassword")}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-500">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
 
-          <Button variant="secondary" type="submit" disabled={isPending}>
-            Submit
-          </Button>
-        </div>
-      </form>
+              <Button className="w-full" type="submit" disabled={isPending}>
+                Submit
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
       <p>
         Already have an account?{" "}
-        <Link href="/sign-in" className="text-red-300">
+        <Link href="/sign-in" className="font-semibold">
           Sign in
         </Link>
       </p>

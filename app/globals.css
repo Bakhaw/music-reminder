@@ -113,3 +113,31 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes snackbar-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes snackbar-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.snackbar-pop {
+  animation: snackbar-pop 320ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.animate-snackbar-progress {
+  animation: snackbar-progress 3s linear forwards;
+}

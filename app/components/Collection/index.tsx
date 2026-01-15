@@ -67,7 +67,7 @@ function Collection({ collection, onEmptyButtonClick }: CollectionProps) {
         </Card>
       ) : (
         <div className="space-y-3">
-          <Card>
+          <Card className="flex-shrink-0">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>

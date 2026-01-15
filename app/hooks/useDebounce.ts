@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-export default function useDebounce(values: unknown[], delay: number) {
+export default function useDebounce<T>(values: T[], delay: number): T[] {
   // State and setters for debounced value
-  const [debouncedValue, setDebouncedValue] = useState(values);
+  const [debouncedValue, setDebouncedValue] = useState<T[]>(values);
 
   useEffect(
     () => {

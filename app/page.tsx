@@ -9,6 +9,8 @@ import Link from "next/link";
 import { getMe } from "@/app/api/me/methods";
 import { ME_QUERY_KEY } from "@/app/lib/queries";
 
+import AppBar from "@/app/components/AppBar";
+import { Button } from "@/app/components/ui/button";
 import Collection from "@/app/components/Collection";
 import SearchBox from "@/app/components/SearchBox";
 import {
@@ -17,15 +19,16 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/app/components/ui/tabs";
-import AppBar from "./components/AppBar";
 
 function Home() {
   const { status } = useSession();
   const [activeTab, setActiveTab] = useState("search");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: me, isLoading: isLoadingMe } = useQuery({
     queryKey: [ME_QUERY_KEY],
     queryFn: getMe,
+    enabled: status === "authenticated",
   });
 
   if (status === "loading" || isLoadingMe)
@@ -36,25 +39,25 @@ function Home() {
     );
 
   return (
-    <div>
+    <div className="h-screen flex flex-col overflow-hidden">
       {status === "unauthenticated" ? (
-        <div className="flex flex-col items-center justify-center gap-8 h-screen">
+        <div className="flex flex-col items-center justify-center gap-8 h-full">
           <Link href="/sign-in">
-            <button className="w-56 border border-red-300 px-6 py-2 text-white">
+            <Button variant="outline" className="w-56">
               Sign In
-            </button>
+            </Button>
           </Link>
           <Link href="/sign-up">
-            <button className="w-56 border border-red-300 px-6 py-2 text-white">
+            <Button variant="outline" className="w-56">
               Sign Up
-            </button>
+            </Button>
           </Link>
         </div>
       ) : (
-        <>
+        <div className="flex-1 flex flex-col overflow-hidden">
           <AppBar />
 
-          <div className="text-center my-6">
+          <div className="text-center my-4 px-2">
             <div className="flex items-center justify-center gap-2 mb-4">
               <h1 className="text-4xl font-bold text-gray-900">
                 Music Reminder 💜
@@ -64,37 +67,58 @@ function Home() {
               Save albums you want to listen to later
             </p>
           </div>
-          <Tabs
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="search" className="flex items-center gap-2">
-                <Search className="h-4 w-4" />
-                Search Albums
-              </TabsTrigger>
-              <TabsTrigger
-                value="collection"
-                className="flex items-center gap-2"
+          <div className="flex-1 px-2 pb-3 flex flex-col overflow-hidden min-h-0">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full flex-1 flex flex-col overflow-hidden min-h-0"
+            >
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="search" className="flex items-center gap-2">
+                  <Search className="h-4 w-4" />
+                  Search Albums
+                </TabsTrigger>
+                <TabsTrigger
+                  value="collection"
+                  className="flex items-center gap-2"
+                >
+                  <Heart className="h-4 w-4" />
+                  My Collection ({me?.albums.length})
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent
+                value="search"
+                forceMount
+                className="flex flex-col overflow-hidden min-h-0 data-[state=inactive]:hidden"
               >
-                <Heart className="h-4 w-4" />
-                My Collection ({me?.albums.length})
-              </TabsTrigger>
-            </TabsList>
+                <div className="flex flex-col gap-4 overflow-hidden min-h-0">
+                  <SearchBox
+                    collection={me?.albums ?? []}
+                    resultsScrollAreaClassName="overflow-y-auto h-full pr-1"
+                    searchQuery={searchQuery}
+                    onSearchQueryChange={setSearchQuery}
+                  />
+                </div>
+              </TabsContent>
 
-            <TabsContent value="search" className="space-y-6">
-              <SearchBox collection={me?.albums ?? []} />
-            </TabsContent>
-
-            <TabsContent value="collection" className="space-y-6">
-              <Collection
-                collection={me?.albums ?? []}
-                onEmptyButtonClick={() => setActiveTab("search")}
-              />
-            </TabsContent>
-          </Tabs>
-        </>
+              <TabsContent
+                value="collection"
+                forceMount
+                className="flex-1 flex flex-col overflow-hidden min-h-0 data-[state=inactive]:hidden"
+              >
+                <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+                  <div className="flex-1 overflow-y-auto pr-1 min-h-0">
+                    <Collection
+                      collection={me?.albums ?? []}
+                      onEmptyButtonClick={() => setActiveTab("search")}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
       )}
     </div>
   );

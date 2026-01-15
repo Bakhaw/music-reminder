@@ -9,6 +9,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
 import { Button } from "@/app/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/app/components/ui/card";
 import { Input } from "@/app/components/ui/input";
 
 const FormSchema = z.object({
@@ -65,42 +72,55 @@ function Signin() {
 
   return (
     <div className="h-screen flex flex-col gap-4 items-center justify-center">
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="flex flex-col gap-6 p-12 border border-red-300 text-black">
-          <h1 className="text-white text-center">SIGN IN</h1>
+      <Card>
+        <CardHeader>
+          <CardTitle>Music Reminder 💜</CardTitle>
 
-          <div>
-            <Input
-              type="email"
-              placeholder="email"
-              disabled={isPending}
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className="text-red-500">{errors.email.message}</p>
-            )}
-          </div>
+          <CardDescription>
+            Welcome back! Sign in to your account
+          </CardDescription>
+        </CardHeader>
 
-          <div>
-            <Input
-              type="password"
-              placeholder="password"
-              disabled={isPending}
-              {...register("password")}
-            />
-            {errors.password && (
-              <p className="text-red-500">{errors.password.message}</p>
-            )}
-          </div>
+        <CardContent>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="space-y-5">
+              <div>
+                <Input
+                  type="email"
+                  placeholder="email"
+                  disabled={isPending}
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <p className="text-sm text-red-500">{errors.email.message}</p>
+                )}
+              </div>
 
-          <Button variant="secondary" type="submit" disabled={isPending}>
-            Submit
-          </Button>
-        </div>
-      </form>
+              <div>
+                <Input
+                  type="password"
+                  placeholder="password"
+                  disabled={isPending}
+                  {...register("password")}
+                />
+                {errors.password && (
+                  <p className="text-sm text-red-500">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              <Button className="w-full" type="submit" disabled={isPending}>
+                Submit
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
       <p>
-        Don&apos;t have an account ?{" "}
-        <Link href="/sign-up" className="text-red-300">
+        Don&apos;t have an account?{" "}
+        <Link href="/sign-up" className="font-semibold">
           Sign up
         </Link>
       </p>

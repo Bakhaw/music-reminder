@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import clsx from "clsx";
 import { Heart, Loader2, Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { AlbumDetailed } from "ytmusic-api";
@@ -31,23 +32,87 @@ export type AlbumToSave = {
 
 type SearchBoxProps = {
   collection: AlbumToSave[];
+  onSaved?: () => void;
+  resultsScrollAreaClassName?: string;
+  searchQuery?: string;
+  onSearchQueryChange?: (query: string) => void;
 };
 
-function SearchBox({ collection }: SearchBoxProps) {
+function SearchBox({
+  collection,
+  onSaved,
+  resultsScrollAreaClassName,
+  searchQuery: controlledSearchQuery,
+  onSearchQueryChange,
+}: SearchBoxProps) {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const debouncedQuery = useDebounce([searchQuery], 500);
+  const [internalSearchQuery, setInternalSearchQuery] = useState("");
+  const searchQuery = controlledSearchQuery ?? internalSearchQuery;
+  const setSearchQuery = onSearchQueryChange ?? setInternalSearchQuery;
+  const debouncedQuery = useDebounce<string>([searchQuery], 500);
   const [addingId, setAddingId] = useState<string | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  // Store scroll positions per query key
+  const scrollPositionsRef = useRef<Map<string, number>>(new Map());
 
-  const { data: albums, isFetching: isSearching } = useQuery<
+  const { data: albums, isLoading: isSearching } = useQuery<
     AlbumDetailed[] | undefined
   >({
     queryKey: ["search", ...debouncedQuery],
     queryFn: () => searchFromYtbmusicApi(`${debouncedQuery[0]}`),
     enabled: Boolean(debouncedQuery[0]),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    gcTime: 10 * 60 * 1000, // Keep cache for 10 minutes
   });
+
+  const currentQueryKey = debouncedQuery[0] || "";
+
+  // Save scroll position when scrolling
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !currentQueryKey) return;
+
+    const handleScroll = () => {
+      scrollPositionsRef.current.set(currentQueryKey, container.scrollTop);
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [currentQueryKey]);
+
+  // Restore scroll position when component mounts or results are available
+  useEffect(() => {
+    if (!albums || albums.length === 0 || !currentQueryKey) return;
+
+    const savedPosition = scrollPositionsRef.current.get(currentQueryKey) || 0;
+    if (savedPosition === 0) return; // Don't restore if there's no saved position
+
+    // Use a more robust approach to restore scroll
+    const attemptRestore = () => {
+      const container = scrollContainerRef.current;
+      if (!container) {
+        requestAnimationFrame(attemptRestore);
+        return;
+      }
+
+      // Wait until container has content
+      if (container.scrollHeight === 0) {
+        requestAnimationFrame(attemptRestore);
+        return;
+      }
+
+      // Restore the position
+      container.scrollTop = savedPosition;
+    };
+
+    // Start restoration attempts
+    requestAnimationFrame(attemptRestore);
+  }, [albums, currentQueryKey]);
 
   const {
     mutate: addToCollectionMutation,
@@ -60,6 +125,7 @@ function SearchBox({ collection }: SearchBoxProps) {
       return saveAlbum(session.user.id, album);
     },
     onSuccess: () => {
+      onSaved?.();
       queryClient.invalidateQueries({ queryKey: [ME_QUERY_KEY] });
     },
     onSettled: () => {
@@ -72,8 +138,8 @@ function SearchBox({ collection }: SearchBoxProps) {
   }
 
   return (
-    <>
-      <Card>
+    <div className="flex flex-col gap-4 flex-1 min-h-0">
+      <Card className="flex-shrink-0">
         <CardHeader>
           <CardTitle>Search for Albums</CardTitle>
           <CardDescription>
@@ -94,7 +160,7 @@ function SearchBox({ collection }: SearchBoxProps) {
       </Card>
 
       {isSearching && (
-        <Card>
+        <Card className="flex-shrink-0">
           <CardContent className="p-8 text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-purple-600" />
             <p className="text-gray-600">Searching albums...</p>
@@ -103,7 +169,13 @@ function SearchBox({ collection }: SearchBoxProps) {
       )}
 
       {!isSearching && albums !== undefined && albums.length > 0 && (
-        <div className="space-y-3">
+        <div
+          ref={scrollContainerRef}
+          className={clsx(
+            "space-y-3",
+            resultsScrollAreaClassName && resultsScrollAreaClassName
+          )}
+        >
           {albums.map((album) => (
             <Card
               key={album.albumId}
@@ -173,7 +245,7 @@ function SearchBox({ collection }: SearchBoxProps) {
           ))}
         </div>
       )}
-    </>
+    </div>
   );
 }
 
