@@ -49,7 +49,7 @@ export async function PATCH(req: NextRequest) {
     const updatedUser = await db.user.update({
       where: { id: userId },
       data: {
-        albums: [...existingAlbums, album],
+        albums: [album, ...existingAlbums],
       },
       select: {
         albums: true,
